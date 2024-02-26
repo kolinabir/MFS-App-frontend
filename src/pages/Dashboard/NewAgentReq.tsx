@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -10,6 +9,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { BounceLoader } from "react-spinners";
+import { useContext } from "react";
+import { AuthContext, AuthContextProps } from "@/Provider/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 interface Agent {
   _id: string;
@@ -25,43 +30,51 @@ interface Agent {
 }
 
 const NewAgentReq = () => {
-  const [agents, setAgents] = useState([]);
+  const { user } = useContext(AuthContext) as AuthContextProps;
+  const navigate = useNavigate();
+  if (user?.role !== "ADMIN") {
+    navigate("/dashboard");
+  }
+
   const token = localStorage.getItem("token");
   const { toast } = useToast();
 
   console.log(token);
-
-  useEffect(() => {
-    const fetchData = async () => {
+  const {
+    data: agents,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["new-agents"],
+    queryFn: async () => {
       try {
-        // Fetch data from the API
-        const response = await fetch(
+        // Assuming token is defined before this point
+        const response = await axios.get(
           "https://mfs-app-backend.vercel.app/admin-control-panel/new-agents",
           {
-            method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: String(token),
             },
           }
         );
-
-        const data = await response.json();
-        console.log(data);
-
-        // Update state with the fetched data
-        if (data.success) {
-          setAgents(data.data.result);
-        } else {
-          console.error(data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+        console.log(response.data.data.result);
+        return response.data;
+      } catch (err) {
+        throw new Error(`Error fetching data: ${err.message}`);
       }
-    };
+    },
+    select: (data) => data.data.result,
+  });
 
-    fetchData();
-  }, [token]);
+  // Example usage in the component
+  if (isLoading) {
+    return <BounceLoader color="#36d7b7" />;
+  }
+
+  if (error) {
+    return <p>Error: {error.message}</p>;
+  }
 
   const handleVerify = (agentId: string) => {
     // Implement verification logic here
@@ -78,7 +91,7 @@ const NewAgentReq = () => {
           },
         }
       );
-      response.then((res) => {
+      response.then(() => {
         toast({
           title: "Agent Verified!",
         });
@@ -91,25 +104,25 @@ const NewAgentReq = () => {
   };
 
   return (
-    <Table className="p-4  mt-14">
+    <Table className="p-4  mt-14 scroll-auto">
       <TableCaption>A list of your recent invoices.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Mobile Number</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead>NID</TableHead>
-          <TableHead>Balance</TableHead>
-          <TableHead>Active</TableHead>
-          <TableHead>Verified</TableHead>
-          <TableHead>Logins</TableHead>
-          <TableHead>Actions</TableHead>
+      <TableHeader className="text-white">
+        <TableRow className="text-white font-bold">
+          <TableHead className="text-white">Name</TableHead>
+          <TableHead className="text-white">Mobile Number</TableHead>
+          <TableHead className="text-white">Email</TableHead>
+          <TableHead className="text-white">Role</TableHead>
+          <TableHead className="text-white">NID</TableHead>
+          <TableHead className="text-white">Balance</TableHead>
+          <TableHead className="text-white">Active</TableHead>
+          <TableHead className="text-white">Verified</TableHead>
+          <TableHead className="text-white">Logins</TableHead>
+          <TableHead className="text-white">Actions</TableHead>
         </TableRow>
       </TableHeader>
 
       <TableBody>
-        {agents.map((agent: Agent) => (
+        {agents?.map((agent: Agent) => (
           <TableRow key={agent._id}>
             <TableCell>{agent.name}</TableCell>
             <TableCell>{agent.mobileNumber}</TableCell>
@@ -122,7 +135,7 @@ const NewAgentReq = () => {
             <TableCell>{agent.devicesLogins}</TableCell>
             <TableCell>
               <Button className="" onClick={() => handleVerify(agent._id)}>
-                Verify
+                Approve Agent
               </Button>
             </TableCell>
           </TableRow>

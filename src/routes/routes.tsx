@@ -5,6 +5,9 @@ import Dashboard from "@/pages/Dashboard/Dashboard";
 import Register from "@/pages/Register/Register";
 import MainDashboard from "@/pages/Dashboard/MainDashboard";
 import NewAgentReq from "@/pages/Dashboard/NewAgentReq";
+import { Tabs } from "@/pages/Dashboard/Tabs";
+import { AgentBoard, UserManagement } from "@/pages/Dashboard/UserManagement";
+import { ViewTransactions } from "@/pages/Dashboard/ViewTransactions";
 const Routes = createBrowserRouter([
   {
     path: "/",
@@ -31,6 +34,14 @@ const Routes = createBrowserRouter([
       {
         path: "/dashboard/new-agent-req",
         element: <NewAgentReq></NewAgentReq>,
+      },
+      {
+        path: "/dashboard/user-management",
+        element: <UserManagement></UserManagement>,
+      },
+      {
+        path: "/dashboard/transactions/:mobileNumber",
+        element: <ViewTransactions></ViewTransactions>,
       },
     ],
   },
