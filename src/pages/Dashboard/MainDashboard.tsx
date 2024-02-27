@@ -38,17 +38,19 @@ const MainDashboard = () => {
     queryFn: async () => {
       try {
         // Assuming token is defined before this point
-        const response = await axios.get(
-          "https://mfs-app-backend.vercel.app/admin-control-panel/all-money",
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: String(token),
-            },
-          }
-        );
-        console.log();
-        return response.data.data;
+        if (user?.role === "ADMIN") {
+          const response = await axios.get(
+            "https://mfs-app-backend.vercel.app/admin-control-panel/all-money",
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: String(token),
+              },
+            }
+          );
+          return response.data.data;
+        }
+        return 0;
       } catch (err) {
         throw new Error(`Error fetching data: ${err.message}`);
       }
@@ -121,25 +123,29 @@ const MainDashboard = () => {
             </p>
           </div>
           <div className="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
-            <p className="text-2xl text-black dark:text-gray-500 w-full">
-              <h1 className="text-base text-center">View Balance</h1>
-              <div className="mx-4">
-                <div className="grid grid-cols-1">
-                  <input
-                    onChange={(e) => handleSearchBalanceByPhone(e.target.value)}
-                    className=" text-xs w-full p-1 mt-2 border-2 border-gray-200 rounded-lg dark:border-gray-700"
-                    type="text"
-                    placeholder="just enter phone no of User/Agent"
-                  />
-                  {/* <button className="col-span-2 w-full text-sm mt-2 bg-blue-500 rounded-lg dark:bg-gray-700">
+            {user?.role === "ADMIN" && (
+              <p className="text-2xl text-black dark:text-gray-500 w-full">
+                <h1 className="text-base text-center">View Balance</h1>
+                <div className="mx-4">
+                  <div className="grid grid-cols-1">
+                    <input
+                      onChange={(e) =>
+                        handleSearchBalanceByPhone(e.target.value)
+                      }
+                      className=" text-xs w-full p-1 mt-2 border-2 border-gray-200 rounded-lg dark:border-gray-700"
+                      type="text"
+                      placeholder="just enter phone no of User/Agent"
+                    />
+                    {/* <button className="col-span-2 w-full text-sm mt-2 bg-blue-500 rounded-lg dark:bg-gray-700">
                     View
                   </button> */}
+                  </div>
                 </div>
-              </div>
-              <p className="text-base text-center">
-                Balance {balanceByPhone} TK
+                <p className="text-base text-center">
+                  Balance {balanceByPhone} TK
+                </p>
               </p>
-            </p>
+            )}
           </div>
         </div>
         <div className="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">

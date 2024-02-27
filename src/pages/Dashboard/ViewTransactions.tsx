@@ -1,4 +1,4 @@
-import React from "react";
+import { useContext } from "react";
 import {
   Table,
   TableBody,
@@ -12,17 +12,15 @@ import {
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { AuthContext, AuthContextProps } from "@/Provider/AuthProvider";
 
 export function ViewTransactions() {
   const { mobileNumber } = useParams();
-  const {
-    data: transactions,
-    error,
-    isLoading,
-  } = useQuery({
-    queryKey: ["transactions", mobileNumber],
-    queryFn: async () => {
-      try {
+  const { user } = useContext(AuthContext) as AuthContextProps;
+
+  const fetchTransactions = async () => {
+    try {
+      if (user?.role === "ADMIN") {
         const response = await axios.get(
           `https://mfs-app-backend.vercel.app/admin-control-panel/transaction/${mobileNumber}`,
           {
@@ -31,13 +29,31 @@ export function ViewTransactions() {
             },
           }
         );
-        console.log(response.data.data);
         return response.data.data;
-      } catch (err) {
-        throw new Error(`Error fetching transactions: ${err.message}`);
+      } else {
+        const response = await axios.get(
+          `https://mfs-app-backend.vercel.app/transaction`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        return response.data;
       }
-    },
-    select: (data) => data,
+    } catch (err) {
+      throw new Error(`Error fetching transactions: ${err.message}`);
+    }
+  };
+
+  const {
+    data: transactions,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["transactions", mobileNumber],
+    queryFn: fetchTransactions,
+    select: (data) => data.data,
   });
 
   if (isLoading) {
@@ -57,10 +73,11 @@ export function ViewTransactions() {
           <TableHead>Amount</TableHead>
           <TableHead>Transaction Date</TableHead>
           <TableHead>Correspondent</TableHead>
+          <TableHead>Correspondent Mobile Number</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {transactions.map((transaction) => (
+        {transactions?.map((transaction) => (
           <TableRow key={transaction._id}>
             <TableCell className="font-medium">
               {transaction.transactionType}
@@ -70,13 +87,36 @@ export function ViewTransactions() {
               {new Date(transaction.transactionDate).toLocaleString()}
             </TableCell>
             <TableCell>
-              {transaction.transactionType === "SEND" ? (
+              {transaction.transactionType === "SEND" && (
                 <>
-                  <strong>User:</strong> {transaction.sender}
+                  <strong>User:</strong> {transaction.receiver.name}
                 </>
-              ) : (
+              )}
+              {transaction.transactionType === "CASH_OUT" && (
                 <>
-                  <strong>Agent:</strong> {transaction.agent}
+                  <strong>Agent:</strong> {transaction?.agent.name}
+                </>
+              )}
+              {transaction.transactionType === "CASH_IN" && (
+                <>
+                  <strong>Agent:</strong> {transaction.agent.name}
+                </>
+              )}
+            </TableCell>
+            <TableCell>
+              {transaction.transactionType === "SEND" && (
+                <>
+                  <strong>User:</strong> {transaction.receiver.mobileNumber}
+                </>
+              )}
+              {transaction.transactionType === "CASH_OUT" && (
+                <>
+                  <strong>Agent:</strong> {transaction?.agent.mobileNumber}
+                </>
+              )}
+              {transaction.transactionType === "CASH_IN" && (
+                <>
+                  <strong>Agent:</strong> {transaction.agent.mobileNumber}
                 </>
               )}
             </TableCell>

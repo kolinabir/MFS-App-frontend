@@ -87,8 +87,6 @@ const AgentCollection = () => {
           },
         }
       );
-
-      // Trigger a refetch after the action to update the UI
       refetch();
       toast({
         title: `${agent.name} has been ${endpoint}ed `,

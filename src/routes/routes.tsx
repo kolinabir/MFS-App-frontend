@@ -8,6 +8,8 @@ import NewAgentReq from "@/pages/Dashboard/NewAgentReq";
 import { Tabs } from "@/pages/Dashboard/Tabs";
 import { AgentBoard, UserManagement } from "@/pages/Dashboard/UserManagement";
 import { ViewTransactions } from "@/pages/Dashboard/ViewTransactions";
+import SendMoney from "@/pages/Dashboard/MoneyRoutes/sendMoney";
+import CashOut from "@/pages/Dashboard/MoneyRoutes/cashout";
 const Routes = createBrowserRouter([
   {
     path: "/",
@@ -42,6 +44,14 @@ const Routes = createBrowserRouter([
       {
         path: "/dashboard/transactions/:mobileNumber",
         element: <ViewTransactions></ViewTransactions>,
+      },
+      {
+        path: "/dashboard/send-money",
+        element: <SendMoney></SendMoney>,
+      },
+      {
+        path: "/dashboard/cash-out",
+        element: <CashOut></CashOut>,
       },
     ],
   },
