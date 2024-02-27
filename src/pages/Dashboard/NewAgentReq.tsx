@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Table,
   TableBody,
@@ -62,7 +63,7 @@ const NewAgentReq = () => {
         );
         console.log(response.data.data.result);
         return response.data;
-      } catch (err) {
+      } catch (err: any) {
         throw new Error(`Error fetching data: ${err.message}`);
       }
     },
@@ -113,7 +114,6 @@ const NewAgentReq = () => {
           <TableHead className="text-white">Name</TableHead>
           <TableHead className="text-white">Mobile Number</TableHead>
           <TableHead className="text-white">Email</TableHead>
-          <TableHead className="text-white">Role</TableHead>
           <TableHead className="text-white">NID</TableHead>
           <TableHead className="text-white">Balance</TableHead>
           <TableHead className="text-white">Active</TableHead>
@@ -129,7 +129,6 @@ const NewAgentReq = () => {
             <TableCell>{agent.name}</TableCell>
             <TableCell>{agent.mobileNumber}</TableCell>
             <TableCell>{agent.email}</TableCell>
-            <TableCell>{agent.role}</TableCell>
             <TableCell>{agent.nid}</TableCell>
             <TableCell>{agent.balance}</TableCell>
             <TableCell>{agent.isAccountActive ? "Yes" : "No"}</TableCell>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useContext } from "react";
 import {
   Table,
@@ -29,7 +30,8 @@ export function ViewTransactions() {
             },
           }
         );
-        return response.data.data;
+        console.log(response.data);
+        return response.data;
       } else {
         const response = await axios.get(
           `https://mfs-app-backend.vercel.app/transaction`,
@@ -42,7 +44,7 @@ export function ViewTransactions() {
         console.log(response.data);
         return response.data;
       }
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(`Error fetching transactions: ${err.message}`);
     }
   };
@@ -64,7 +66,6 @@ export function ViewTransactions() {
   if (error) {
     return <p>Error: {error.message}</p>;
   }
-
   return (
     <Table className="mt-20">
       <TableCaption>A list of your recent transactions.</TableCaption>
@@ -78,53 +79,57 @@ export function ViewTransactions() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {transactions?.map((transaction) => (
+        {transactions?.map((transaction: any) => (
           <TableRow key={transaction._id}>
             <TableCell className="font-medium">
-              {transaction.transactionType}
+              {transaction?.transactionType}
             </TableCell>
-            <TableCell>{transaction.amount}</TableCell>
+            <TableCell>{transaction?.amount}</TableCell>
             <TableCell>
-              {new Date(transaction.transactionDate).toLocaleString()}
+              {new Date(transaction?.transactionDate).toLocaleString()}
             </TableCell>
             <TableCell>
-              {transaction.transactionType === "SEND" && (
+              {transaction?.transactionType === "SEND" && (
                 <>
-                  <strong>User:</strong> {transaction.receiver.name}
+                  <strong>User:</strong> {transaction?.receiver.name}
+                  {transaction?.sender.name}
                 </>
               )}
-              {transaction.transactionType === "CASH_OUT" && (
+              {transaction?.transactionType === "CASH_OUT" && (
                 <>
                   <strong>Agent:</strong> {transaction?.agent.name}
+                  {console.log(transaction)}
                 </>
               )}
-              {transaction.transactionType === "CASH_IN" && (
+
+              {transaction?.transactionType === "CASH_IN" && (
                 <>
                   <strong>{user?.role === "AGENT" ? " User" : " Agent"}</strong>{" "}
                   {user?.role === "AGENT"
                     ? transaction?.user.name
-                    : transaction.agent.name}
+                    : transaction?.agent.name}
                 </>
               )}
             </TableCell>
             <TableCell>
-              {transaction.transactionType === "SEND" && (
+              {transaction?.transactionType === "SEND" && (
                 <>
-                  <strong>User:</strong> {transaction.receiver.mobileNumber}
+                  <strong>User:</strong> {transaction?.receiver?.mobileNumber}
+                  {transaction?.sender?.mobileNumber}
                 </>
               )}
 
-              {transaction.transactionType === "CASH_OUT" && (
+              {transaction?.transactionType === "CASH_OUT" && (
                 <>
                   <strong>Agent:</strong> {transaction?.agent.mobileNumber}
                 </>
               )}
-              {transaction.transactionType === "CASH_IN" && (
+              {transaction?.transactionType === "CASH_IN" && (
                 <>
                   <strong>{user?.role === "AGENT" ? " User" : "Agent"}</strong>{" "}
                   {user?.role === "AGENT"
                     ? transaction?.user.mobileNumber
-                    : transaction.agent.mobileNumber}
+                    : transaction?.agent.mobileNumber}
                 </>
               )}
             </TableCell>
@@ -135,8 +140,9 @@ export function ViewTransactions() {
         <TableRow>
           <TableCell colSpan={2}>Total</TableCell>
           <TableCell className="text-right">
-            {transactions.reduce(
-              (total, transaction) => total + transaction.amount,
+            {transactions?.reduce(
+              (total: any, transaction: { amount: any }) =>
+                total + transaction.amount,
               0
             )}
           </TableCell>

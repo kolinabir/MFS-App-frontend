@@ -3,33 +3,55 @@ import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import axios from "axios";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
-const CashIn = () => {
+const ReqRecharge = () => {
   const [formData, setFormData] = useState({
-    userMobileNumber: "", // Updated field name
     amount: 0,
-    pin: "",
   });
+  const { data: recharge, refetch } = useQuery({
+    queryKey: ["recharge"],
+    queryFn: async () => {
+      try {
+        // Assuming token is defined before this point
+        const response = await axios.get(
+          "https://mfs-app-backend.vercel.app/recharge",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: String(token),
+            },
+          }
+        );
+        return response.data.data[response.data.data.length - 1];
+      } catch (err: any) {
+        throw new Error(`Error fetching data: ${err.message}`);
+      }
+    },
+    select: (data) => data,
+    gcTime: 0,
+    refetchOnWindowFocus: true,
+  });
+  console.log(recharge);
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
   const toast = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: any) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      amount: e.target.value,
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const { userMobileNumber, amount, pin } = formData;
+    const { amount } = formData;
     setLoading(true);
-
     try {
       const response = await axios.post(
-        "https://mfs-app-backend.vercel.app/transaction/cash-in",
-        { mobileNumber: userMobileNumber, amount, pin },
+        "https://mfs-app-backend.vercel.app/recharge",
+        { amount }, // Assuming you have a default pin or you get it from somewhere
         {
           headers: {
             "Content-Type": "application/json",
@@ -38,13 +60,14 @@ const CashIn = () => {
         }
       );
       const data = response.data;
+      refetch();
       if (data.error) {
         toast.toast({
-          title: "Cash In Failed!",
+          title: "Recharge Request Failed!",
         });
       } else {
         toast.toast({
-          title: "Cash In Successful!",
+          title: "Recharge Requested Sent!",
         });
       }
     } catch (error: any) {
@@ -66,24 +89,6 @@ const CashIn = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
-              htmlFor="userMobileNumber" // Updated field name
-              className="block text-sm font-medium text-gray-600"
-            >
-              User Mobile Number
-            </label>
-            <input
-              type="number"
-              id="userMobileNumber" // Updated field name
-              name="userMobileNumber" // Updated field name
-              value={formData.userMobileNumber} // Updated field name
-              onChange={handleChange}
-              className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:border-blue-500"
-              placeholder="User Mobile Number" // Updated placeholder
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label
               htmlFor="amount"
               className="block text-sm font-medium text-gray-600"
             >
@@ -100,34 +105,23 @@ const CashIn = () => {
               required
             />
           </div>
-          <div className="mb-4">
-            <label
-              htmlFor="pin"
-              className="block text-sm font-medium text-gray-600"
-            >
-              PIN
-            </label>
-            <input
-              type="text"
-              id="pin"
-              name="pin"
-              value={formData.pin}
-              onChange={handleChange}
-              className="mt-1 p-2 w-full border rounded-md focus:outline-none focus:border-blue-500"
-              placeholder="PIN"
-              required
-            />
-          </div>
           <button
             type="submit"
             className={cn(
               "bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600",
               loading &&
+                "cursor-not-allowed bg-blue-300 hover:bg-blue-300 focus:bg-blue-300",
+              recharge &&
+                recharge?.isApproved === false &&
                 "cursor-not-allowed bg-blue-300 hover:bg-blue-300 focus:bg-blue-300"
             )}
-            disabled={loading}
+            disabled={loading === true || recharge?.isApproved === false}
           >
-            {loading ? "Loading..." : "Cash In"}
+            {loading
+              ? "Loading..."
+              : recharge?.isApproved === false
+              ? "Pending Old Request..."
+              : "Submit"}
           </button>
         </form>
       </div>
@@ -135,4 +129,4 @@ const CashIn = () => {
   );
 };
 
-export default CashIn;
+export default ReqRecharge;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { AuthContext, AuthContextProps } from "@/Provider/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
@@ -12,12 +13,12 @@ const MainDashboard = () => {
   if (loading) {
     return <p>Loading...</p>;
   }
-  if (!loading) {
+  if (loading === false) {
     if (user === null) {
-      navigate("/login");
+      navigate("/");
     }
   }
-  const { data: userDetails, isLoading: userDetailsLoading } = useQuery({
+  const { data: userDetails } = useQuery({
     queryKey: ["userDetails"],
     queryFn: async () => {
       try {
@@ -33,7 +34,7 @@ const MainDashboard = () => {
         );
         console.log(response.data.data);
         return response.data.data;
-      } catch (err) {
+      } catch (err: any) {
         throw new Error(`Error fetching data: ${err.message}`);
       }
     },
@@ -55,7 +56,7 @@ const MainDashboard = () => {
           }
         );
         return response.data.data[0].balance;
-      } catch (err) {
+      } catch (err: any) {
         throw new Error(`Error fetching data: ${err.message}`);
       }
     },
@@ -79,7 +80,7 @@ const MainDashboard = () => {
           return response.data.data;
         }
         return 0;
-      } catch (err) {
+      } catch (err: any) {
         throw new Error(`Error fetching data: ${err.message}`);
       }
     },
@@ -98,7 +99,7 @@ const MainDashboard = () => {
         }
       );
       setBalanceByPhone(response.data.data.balance);
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(`Error fetching data: ${err.message}`);
     }
   };
@@ -176,107 +177,23 @@ const MainDashboard = () => {
             )}
           </div>
         </div>
-        <div className="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">
+        {user?.role === "AGENT" && (
+          <div className="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">
+            <p className="text-2xl text-gray-400 dark:text-gray-500">
+              {userDetails?.isAccountVerified === false &&
+                "Your account is not verified yet"}
+            </p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-center h-32 mb-4 rounded bg-gray-50 dark:bg-gray-800">
           <p className="text-2xl text-gray-400 dark:text-gray-500">
-            {userDetails?.isAccountVerified === false &&
-              "Your account is not verified yet"}
+            Welcome {userDetails?.name}
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-            <p className="text-2xl text-gray-400 dark:text-gray-500">
-              <svg
-                className="w-3.5 h-3.5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 18 18"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 1v16M1 9h16"
-                />
-              </svg>
-            </p>
-          </div>
-          <div className="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-            <p className="text-2xl text-gray-400 dark:text-gray-500">
-              <svg
-                className="w-3.5 h-3.5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 18 18"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 1v16M1 9h16"
-                />
-              </svg>
-            </p>
-          </div>
-          <div className="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-            <p className="text-2xl text-gray-400 dark:text-gray-500">
-              <svg
-                className="w-3.5 h-3.5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 18 18"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 1v16M1 9h16"
-                />
-              </svg>
-            </p>
-          </div>
-          <div className="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-            <p className="text-2xl text-gray-400 dark:text-gray-500">
-              <svg
-                className="w-3.5 h-3.5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 18 18"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 1v16M1 9h16"
-                />
-              </svg>
-            </p>
-          </div>
-        </div>
         <div className="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">
           <p className="text-2xl text-gray-400 dark:text-gray-500">
-            <svg
-              className="w-3.5 h-3.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 18 18"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 1v16M1 9h16"
-              />
-            </svg>
+            {user?.role}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4">

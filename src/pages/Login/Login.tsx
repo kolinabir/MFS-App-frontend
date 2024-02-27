@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useContext, useState } from "react";
 import { AuthContext, AuthContextProps } from "../../Provider/AuthProvider";
 import { useNavigate } from "react-router-dom";
@@ -54,12 +55,11 @@ function Login() {
 
       // Use navigate to redirect after successful login
       // navigate(location?.state ? location.state : "/");
-    } catch (error) {
+    } catch (error: any) {
       setError(true);
       console.error(error);
       toast({
-        title: "Login failed",
-        description: "Invalid user credentials",
+        title: error.response.data.message,
       });
     } finally {
       setLoading(false);

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import axios from "axios";
@@ -10,17 +11,19 @@ const CashOut = () => {
     pin: "",
   });
   const [loading, setLoading] = useState(false);
+  const [charge, setCharge] = useState(0);
   const token = localStorage.getItem("token");
   const toast = useToast();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setCharge(formData.amount * 0.015);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const { mobileNumber, amount, pin } = formData;
     setLoading(true);
@@ -44,10 +47,18 @@ const CashOut = () => {
         });
       } else {
         toast.toast({
-          title: "Cash Out Successful!",
+          title: `Cash Out Successful! Total Cost ${
+            charge + Number(formData.amount)
+          }`,
         });
       }
-    } catch (error) {
+      // empty form fields
+      setFormData({
+        mobileNumber: "",
+        amount: 0,
+        pin: "",
+      });
+    } catch (error: any) {
       if (error.response) {
         toast.toast({
           title: error.response.data.message,
@@ -61,8 +72,8 @@ const CashOut = () => {
   return (
     <div className="flex items-center justify-center  h-screen">
       <div className="w-full max-w-md mx-auto my-8 p-6 bg-white shadow-md rounded-md">
-        <h2 className="text-2xl font-bold mb-4">Send Money</h2>
-        <form onSubmit={handleSubmit}>
+        <h2 className="text-2xl font-bold mb-4">Cash Out</h2>
+        <form onSubmit={(e) => handleSubmit(e)}>
           <div className="mb-4">
             <label
               htmlFor="mobileNumber"
@@ -117,6 +128,7 @@ const CashOut = () => {
               required
             />
           </div>
+          <h1>Total Cost: {charge + Number(formData.amount)}</h1>
           <button
             type="submit"
             className={cn(

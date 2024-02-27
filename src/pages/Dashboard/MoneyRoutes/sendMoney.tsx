@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useToast } from "@/components/ui/use-toast";
 import { useState } from "react";
 import axios from "axios";
@@ -8,23 +9,32 @@ const SendMoney = () => {
     mobileNo: "",
     amount: 0,
   });
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
   const toast = useToast();
+  const [sendMoneyCharge, setSendMoneyCharge] = useState(0);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+
+    // Update form data
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // Calculate and set send money charge
+    const amount = parseFloat(value);
+    const charge = amount >= 100 ? 5 : 0;
+    setSendMoneyCharge(charge);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const mobileNumber = formData.mobileNo;
     const amount = formData.amount;
 
-    setLoading(true); // Set loading state to true
+    setLoading(true);
 
     try {
       const response = await axios.post(
@@ -44,18 +54,22 @@ const SendMoney = () => {
           title: "Money Sent Failed!",
         });
       } else {
+        // Calculate and set send money charge
+        const charge = amount >= 100 ? 5 : 0;
+        setSendMoneyCharge(charge);
+
         toast.toast({
-          title: "Money Sent Successfully!",
+          title: `Money Sent Successfully! 🎉  Charge: ${charge}`,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error.response) {
         toast.toast({
           title: error.response.data.message,
         });
       }
     } finally {
-      setLoading(false); // Set loading state back to false after request completes
+      setLoading(false);
     }
   };
 
@@ -111,6 +125,12 @@ const SendMoney = () => {
           >
             {loading ? "Sending..." : "Send Money"}
           </button>
+
+          {sendMoneyCharge > 0 && (
+            <p className="text-sm text-gray-600 mt-2">
+              Send money charge: {sendMoneyCharge}TK
+            </p>
+          )}
         </form>
       </div>
     </div>

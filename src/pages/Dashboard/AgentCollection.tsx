@@ -1,4 +1,4 @@
-import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Table,
   TableBody,
@@ -10,13 +10,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useQuery, useMutation, queryCache } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { BounceLoader } from "react-spinners";
 import { useContext, useState } from "react";
 import { AuthContext, AuthContextProps } from "@/Provider/AuthProvider";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Agent {
   _id: string;
@@ -68,7 +68,7 @@ const AgentCollection = () => {
         );
 
         return response.data.data;
-      } catch (err) {
+      } catch (err: any) {
         throw new Error(`Error fetching data: ${err.message}`);
       }
     },
