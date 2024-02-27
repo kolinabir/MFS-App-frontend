@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { AuthContext, AuthContextProps } from "@/Provider/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -6,11 +7,38 @@ import { useNavigate } from "react-router-dom";
 import { BounceLoader } from "react-spinners";
 
 const MainDashboard = () => {
-  const { user } = useContext(AuthContext) as AuthContextProps;
+  const { user, loading } = useContext(AuthContext) as AuthContextProps;
   const navigate = useNavigate();
-  if (user === null) {
-    navigate("/login");
+  if (loading) {
+    return <p>Loading...</p>;
   }
+  if (!loading) {
+    if (user === null) {
+      navigate("/login");
+    }
+  }
+  const { data: userDetails, isLoading: userDetailsLoading } = useQuery({
+    queryKey: ["userDetails"],
+    queryFn: async () => {
+      try {
+        // Assuming token is defined before this point
+        const response = await axios.get(
+          "https://mfs-app-backend.vercel.app/admin-control-panel/details",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: String(token),
+            },
+          }
+        );
+        console.log(response.data.data);
+        return response.data.data;
+      } catch (err) {
+        throw new Error(`Error fetching data: ${err.message}`);
+      }
+    },
+    select: (data) => data,
+  });
   const token = localStorage.getItem("token");
   const { data: balance, isLoading: balanceLoading } = useQuery({
     queryKey: ["balance"],
@@ -150,21 +178,8 @@ const MainDashboard = () => {
         </div>
         <div className="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">
           <p className="text-2xl text-gray-400 dark:text-gray-500">
-            <svg
-              className="w-3.5 h-3.5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 18 18"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 1v16M1 9h16"
-              />
-            </svg>
+            {userDetails?.isAccountVerified === false &&
+              "Your account is not verified yet"}
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4 mb-4">

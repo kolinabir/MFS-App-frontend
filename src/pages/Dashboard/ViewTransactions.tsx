@@ -39,6 +39,7 @@ export function ViewTransactions() {
             },
           }
         );
+        console.log(response.data);
         return response.data;
       }
     } catch (err) {
@@ -99,7 +100,10 @@ export function ViewTransactions() {
               )}
               {transaction.transactionType === "CASH_IN" && (
                 <>
-                  <strong>Agent:</strong> {transaction.agent.name}
+                  <strong>{user?.role === "AGENT" ? " User" : " Agent"}</strong>{" "}
+                  {user?.role === "AGENT"
+                    ? transaction?.user.name
+                    : transaction.agent.name}
                 </>
               )}
             </TableCell>
@@ -109,6 +113,7 @@ export function ViewTransactions() {
                   <strong>User:</strong> {transaction.receiver.mobileNumber}
                 </>
               )}
+
               {transaction.transactionType === "CASH_OUT" && (
                 <>
                   <strong>Agent:</strong> {transaction?.agent.mobileNumber}
@@ -116,7 +121,10 @@ export function ViewTransactions() {
               )}
               {transaction.transactionType === "CASH_IN" && (
                 <>
-                  <strong>Agent:</strong> {transaction.agent.mobileNumber}
+                  <strong>{user?.role === "AGENT" ? " User" : "Agent"}</strong>{" "}
+                  {user?.role === "AGENT"
+                    ? transaction?.user.mobileNumber
+                    : transaction.agent.mobileNumber}
                 </>
               )}
             </TableCell>

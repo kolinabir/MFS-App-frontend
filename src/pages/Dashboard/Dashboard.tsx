@@ -1,5 +1,7 @@
 import { AuthContext, AuthContextProps } from "@/Provider/AuthProvider";
 import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { useContext, useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 // Assuming you are using React Router
@@ -10,10 +12,34 @@ const Dashboard = () => {
     AuthContext
   ) as AuthContextProps;
   useEffect(() => {
-    if (user === null) {
-      navigate("/login");
+    if (loading === false) {
+      if (user === null) {
+        navigate("/login");
+      }
     }
-  }, [user, navigate]);
+  }, [loading, navigate, user]);
+  const { data: userDetails, isLoading: userDetailsLoading } = useQuery({
+    queryKey: ["userDetails"],
+    queryFn: async () => {
+      try {
+        // Assuming token is defined before this point
+        const response = await axios.get(
+          "https://mfs-app-backend.vercel.app/admin-control-panel/details",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: String(token),
+            },
+          }
+        );
+        console.log(response.data.data);
+        return response.data.data;
+      } catch (err) {
+        throw new Error(`Error fetching data: ${err.message}`);
+      }
+    },
+    select: (data) => data,
+  });
 
   const { toast } = useToast();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -240,42 +266,75 @@ const Dashboard = () => {
                 </NavLink>
               </li>
             )}
-            <li>
-              <NavLink
-                to="/dashboard/send-money"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-              >
-                <svg
-                  className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 20 18"
+            {user?.role === "USER" && (
+              <li>
+                <NavLink
+                  to="/dashboard/send-money"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
-                  <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
-                </svg>
-                <span className="flex-1 ms-3 whitespace-nowrap">
-                  Send Money
-                </span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/dashboard/cash-out"
-                className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-              >
-                <svg
-                  className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 20 18"
+                  <svg
+                    className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 18"
+                  >
+                    <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
+                  </svg>
+                  <span className="flex-1 ms-3 whitespace-nowrap">
+                    Send Money
+                  </span>
+                </NavLink>
+              </li>
+            )}
+            {user?.role === "USER" && (
+              <li>
+                <NavLink
+                  to="/dashboard/cash-out"
+                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
-                  <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
-                </svg>
-                <span className="flex-1 ms-3 whitespace-nowrap">Cash Out</span>
-              </NavLink>
-            </li>
+                  <svg
+                    className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 20 18"
+                  >
+                    <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
+                  </svg>
+                  <span className="flex-1 ms-3 whitespace-nowrap">
+                    Cash Out
+                  </span>
+                </NavLink>
+              </li>
+            )}
+            {user?.role === "AGENT" && (
+              <li>
+                <button>
+                  <NavLink
+                    to="/dashboard/cash-in"
+                    className={cn(
+                      "flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group",
+                      userDetails?.isAccountVerified === false &&
+                        "opacity-50 pointer-events-none"
+                    )}
+                  >
+                    <svg
+                      className="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 18"
+                    >
+                      <path d="M14 2a3.963 3.963 0 0 0-1.4.267 6.439 6.439 0 0 1-1.331 6.638A4 4 0 1 0 14 2Zm1 9h-1.264A6.957 6.957 0 0 1 15 15v2a2.97 2.97 0 0 1-.184 1H19a1 1 0 0 0 1-1v-1a5.006 5.006 0 0 0-5-5ZM6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Z" />
+                    </svg>
+                    <span className="flex-1 ms-3 whitespace-nowrap">
+                      Cash In
+                    </span>
+                  </NavLink>
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </aside>

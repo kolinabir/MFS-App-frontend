@@ -30,10 +30,12 @@ interface Agent {
 }
 
 const NewAgentReq = () => {
-  const { user } = useContext(AuthContext) as AuthContextProps;
+  const { user, loading } = useContext(AuthContext) as AuthContextProps;
   const navigate = useNavigate();
-  if (user?.role !== "ADMIN") {
-    navigate("/dashboard");
+  if (loading === false) {
+    if (user?.role !== "ADMIN") {
+      navigate("/dashboard");
+    }
   }
 
   const token = localStorage.getItem("token");

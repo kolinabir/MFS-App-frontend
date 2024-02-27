@@ -10,6 +10,7 @@ import { AgentBoard, UserManagement } from "@/pages/Dashboard/UserManagement";
 import { ViewTransactions } from "@/pages/Dashboard/ViewTransactions";
 import SendMoney from "@/pages/Dashboard/MoneyRoutes/sendMoney";
 import CashOut from "@/pages/Dashboard/MoneyRoutes/cashout";
+import CashIn from "@/pages/Dashboard/MoneyRoutes/cashIn";
 const Routes = createBrowserRouter([
   {
     path: "/",
@@ -52,6 +53,10 @@ const Routes = createBrowserRouter([
       {
         path: "/dashboard/cash-out",
         element: <CashOut></CashOut>,
+      },
+      {
+        path: "/dashboard/cash-in",
+        element: <CashIn></CashIn>,
       },
     ],
   },

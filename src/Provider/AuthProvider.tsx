@@ -98,7 +98,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signOut = () => {
-    localStorage.removeItem("token");
     try {
       fetch("https://mfs-app-backend.vercel.app/auth/logout", {
         method: "GET",
@@ -106,10 +105,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           Authorization: localStorage.getItem("token") || "",
         },
       });
+      localStorage.removeItem("token");
     } catch (e) {
       console.error("Error during logout");
     }
-
     setUser(null);
   };
 
